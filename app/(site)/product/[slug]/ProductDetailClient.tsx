@@ -48,7 +48,18 @@ export default function ProductDetailClient({
         className="relative aspect-[4/5] w-full bg-charcoal"
       >
         {product.image_url ? (
-          <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+          product.media_type === "video" ? (
+            <video
+              src={product.image_url}
+              className="absolute inset-0 h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
+          ) : (
+            <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+          )
         ) : (
           <div className="flex h-full items-center justify-center text-gold-dim">
             <span className="font-display text-2xl italic">YAARANA</span>

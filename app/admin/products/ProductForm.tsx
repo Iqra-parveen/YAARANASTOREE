@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Button from "@/components/ui/Button";
 import type { Category, Product } from "@/lib/types";
@@ -23,19 +24,43 @@ export default function ProductForm({
     description: product?.description ?? "",
     price: product?.price?.toString() ?? "",
     category_id: product?.category_id ?? categories[0]?.id ?? "",
-    image_url: product?.image_url ?? "",
     quantity: product?.quantity?.toString() ?? "0",
     status: product?.status ?? "active",
     featured: product?.featured ?? false,
   });
+  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (!product && !file) {
+      setError("Please choose an image or video file.");
+      return;
+    }
+
     setSaving(true);
     const supabase = createClient();
+
+    let mediaFields: { image_url: string; media_type: "image" | "video" } | null = null;
+
+    if (file) {
+      const mediaType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
+      const ext = file.name.split(".").pop();
+      const path = `${crypto.randomUUID()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage.from("products").upload(path, file);
+      if (uploadError) {
+        setSaving(false);
+        setError(uploadError.message);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage.from("products").getPublicUrl(path);
+      mediaFields = { image_url: publicUrlData.publicUrl, media_type: mediaType };
+    }
 
     const payload = {
       name: form.name,
@@ -43,10 +68,10 @@ export default function ProductForm({
       description: form.description || null,
       price: Number(form.price),
       category_id: form.category_id || null,
-      image_url: form.image_url || null,
       quantity: Number(form.quantity),
       status: form.status,
       featured: form.featured,
+      ...(mediaFields ?? {}),
     };
 
     const { error } = product
@@ -112,13 +137,27 @@ export default function ProductForm({
         </Field>
       </div>
 
-      <Field label="Image URL">
+      <Field label={product ? "Replace image/video (optional)" : "Image or video"} required={!product}>
+        {product?.image_url && !file && (
+          <div className="mb-2 h-24 w-24 overflow-hidden rounded-sm border border-hairline bg-charcoal">
+            {product.media_type === "video" ? (
+              <video src={product.image_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+            ) : (
+              <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+            )}
+          </div>
+        )}
         <input
-          value={form.image_url}
-          onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-          placeholder="https://..."
-          className="focus-gold w-full rounded-sm border border-hairline bg-charcoal px-3 py-2 text-sm text-bone"
+          type="file"
+          accept="image/*,video/*"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="focus-gold w-full rounded-sm border border-hairline bg-charcoal px-3 py-2 text-sm text-bone file:mr-3 file:rounded-sm file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-xs file:text-bone"
         />
+        {file && (
+          <p className="mt-1 flex items-center gap-1 text-xs text-bone/50">
+            <Upload size={12} /> {file.name} ({file.type.startsWith("video/") ? "video" : "image"})
+          </p>
+        )}
       </Field>
 
       <Field label="Description">
