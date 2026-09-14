@@ -11,6 +11,7 @@ export type Category = {
 };
 
 export type Product = {
+  media_type: string;
   id: string;
   name: string;
   slug: string;

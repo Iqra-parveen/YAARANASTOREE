@@ -52,6 +52,7 @@ export default function SignInPage() {
         <input
           type="password"
           required
+          minLength={8}
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

@@ -7,7 +7,7 @@ export default function SplashPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const t = setTimeout(() => router.replace("/home"), 2600);
+    const t = setTimeout(() => router.replace("/home"), 60);
     return () => clearTimeout(t);
   }, [router]);
 

@@ -8,13 +8,23 @@ export default function ProductCard({ product }: { product: Product }) {
     <Link href={`/product/${product.slug}`} className="focus-gold group block">
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-charcoal">
         {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            fill
-            sizes="(max-width: 480px) 50vw, 240px"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          product.media_type === "video" ? (
+            <video
+              src={product.image_url}
+              muted
+              playsInline
+              preload="metadata"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <Image
+              src={product.image_url}
+              alt={product.name}
+              fill
+              sizes="(max-width: 480px) 50vw, 240px"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          )
         ) : (
           <div className="flex h-full items-center justify-center text-gold-dim">
             <span className="font-display italic">YAARANA</span>

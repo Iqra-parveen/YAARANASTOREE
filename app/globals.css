@@ -285,3 +285,18 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+/* Gradient headings, adapted from a dark-theme reference for our light/gold palette */
+.text-gradient-onlight {
+  background: linear-gradient(180deg, #1C1710 0%, #96691F 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.text-gradient-ondark {
+  background: linear-gradient(180deg, #F4EDDB 0%, #96691F 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}

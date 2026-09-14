@@ -29,7 +29,17 @@ export default function CartLineItem({
         }`}
       >
         {product.image_url && (
-          <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+          product.media_type === "video" ? (
+            <video
+              src={product.image_url}
+              className="absolute inset-0 h-full w-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+          )
         )}
       </div>
       <div className="flex flex-1 flex-col">
