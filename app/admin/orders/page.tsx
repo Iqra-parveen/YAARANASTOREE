@@ -32,7 +32,7 @@ export default async function AdminOrdersPage({
     <div>
       <h1 className="font-display text-2xl italic text-bone">Orders</h1>
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {filters.map((f) => (
           <Link
             key={f}
@@ -47,7 +47,8 @@ export default async function AdminOrdersPage({
         ))}
       </div>
 
-      <div className="mt-6 overflow-x-auto border border-hairline">
+      {/* Desktop: table */}
+      <div className="mt-6 hidden overflow-x-auto border border-hairline md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="border-b border-hairline text-xs text-bone/50">
@@ -97,6 +98,43 @@ export default async function AdminOrdersPage({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: cards */}
+      <div className="mt-6 flex flex-col gap-3 md:hidden">
+        {orders?.map((o) => (
+          <div key={o.id} className="border border-hairline p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gold">{o.tracking_id}</span>
+              <span className="text-sm text-bone/80">{formatPrice(o.total_amount)}</span>
+            </div>
+            <p className="mt-1 text-sm text-bone/80">{o.shipping_full_name}</p>
+            <p className="mt-1 text-xs text-bone/50">{new Date(o.created_at).toLocaleDateString()}</p>
+            <div className="mt-1 flex items-center gap-1 text-xs">
+              <span
+                className={cn(
+                  "capitalize",
+                  o.payment_status === "paid" ? "text-gold" : "text-bone/50"
+                )}
+              >
+                {(o.payment_status ?? "awaiting_payment").replace("_", " ")}
+              </span>
+              {o.payment_method && (
+                <span className="text-bone/40">
+                  ({o.payment_method === "jazzcash" ? "JazzCash" : "EasyPaisa"})
+                </span>
+              )}
+            </div>
+            <div className="mt-3 border-t border-hairline pt-2">
+              <OrderStatusSelect id={o.id} status={o.status} />
+            </div>
+          </div>
+        ))}
+        {(!orders || orders.length === 0) && (
+          <p className="border border-hairline px-3 py-6 text-center text-sm text-bone/40">
+            No orders in this filter.
+          </p>
+        )}
       </div>
     </div>
   );

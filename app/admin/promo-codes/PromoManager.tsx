@@ -64,7 +64,7 @@ export default function PromoManager({ promos }: { promos: PromoCode[] }) {
 
   return (
     <div>
-      <form onSubmit={addPromo} className="mt-6 grid max-w-2xl grid-cols-2 gap-3 md:grid-cols-3">
+      <form onSubmit={addPromo} className="mt-6 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
         <input
           placeholder="CODE"
           value={form.code}
@@ -113,13 +113,14 @@ export default function PromoManager({ promos }: { promos: PromoCode[] }) {
           onChange={(e) => setForm({ ...form, expiry_date: e.target.value })}
           className="focus-gold rounded-sm border border-hairline bg-charcoal px-3 py-2 text-sm text-bone"
         />
-        <Button type="submit" disabled={saving} className="col-span-2 md:col-span-1">
+        <Button type="submit" disabled={saving} className="sm:col-span-2 md:col-span-1">
           {saving ? "Adding..." : "Add code"}
         </Button>
       </form>
       {error && <p className="mt-2 text-xs text-rust">{error}</p>}
 
-      <div className="mt-6 overflow-x-auto border border-hairline">
+      {/* Desktop: table */}
+      <div className="mt-6 hidden overflow-x-auto border border-hairline md:block">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
             <tr className="border-b border-hairline text-xs text-bone/50">
@@ -167,6 +168,41 @@ export default function PromoManager({ promos }: { promos: PromoCode[] }) {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: cards */}
+      <div className="mt-6 flex flex-col gap-3 md:hidden">
+        {promos.map((p) => (
+          <div key={p.id} className="border border-hairline p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gold">{p.code}</span>
+              <span className="text-sm text-bone/80">
+                {p.discount_type === "percentage" ? `${p.discount}%` : formatPrice(p.discount)}
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-bone/60">
+              <span>
+                Used: {p.usage_count}
+                {p.usage_limit ? ` / ${p.usage_limit}` : ""}
+              </span>
+              <span>Expires: {p.expiry_date ? new Date(p.expiry_date).toLocaleDateString() : "—"}</span>
+              <span className="capitalize">{p.status}</span>
+            </div>
+            <div className="mt-3 flex gap-4 border-t border-hairline pt-2 text-xs">
+              <button onClick={() => toggleStatus(p)} className="focus-gold text-gold">
+                {p.status === "active" ? "Deactivate" : "Activate"}
+              </button>
+              <button onClick={() => remove(p)} className="focus-gold text-rust">
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+        {promos.length === 0 && (
+          <p className="border border-hairline px-3 py-6 text-center text-sm text-bone/40">
+            No promo codes yet.
+          </p>
+        )}
       </div>
     </div>
   );

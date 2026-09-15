@@ -24,7 +24,8 @@ export default async function AdminProductsPage() {
         </Link>
       </div>
 
-      <div className="mt-6 overflow-x-auto border border-hairline">
+      {/* Desktop: table */}
+      <div className="mt-6 hidden overflow-x-auto border border-hairline md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="border-b border-hairline text-xs text-bone/50">
@@ -60,6 +61,34 @@ export default async function AdminProductsPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: cards */}
+      <div className="mt-6 flex flex-col gap-3 md:hidden">
+        {products?.map((p) => (
+          <div key={p.id} className="border border-hairline p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm text-bone">{p.name}</p>
+                <p className="text-xs text-bone/50">{p.categories?.name ?? "Uncategorized"}</p>
+              </div>
+              <p className="shrink-0 text-sm text-gold">{formatPrice(p.price)}</p>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-bone/60">
+              <span>Stock: {p.quantity}</span>
+              <span className="capitalize">{p.status}</span>
+              {p.featured && <span className="text-gold">Featured</span>}
+            </div>
+            <div className="mt-3 border-t border-hairline pt-2">
+              <ProductRowActions id={p.id} status={p.status} />
+            </div>
+          </div>
+        ))}
+        {(!products || products.length === 0) && (
+          <p className="border border-hairline px-3 py-6 text-center text-sm text-bone/40">
+            No products yet — add your first one.
+          </p>
+        )}
       </div>
     </div>
   );

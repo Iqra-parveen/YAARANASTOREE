@@ -50,7 +50,9 @@ export default async function AdminDashboard() {
 
       <div className="mt-8">
         <h2 className="mb-3 text-sm text-bone/70">Recent Orders</h2>
-        <div className="overflow-x-auto border border-hairline">
+
+        {/* Desktop: table */}
+        <div className="hidden overflow-x-auto border border-hairline md:block">
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
               <tr className="border-b border-hairline text-xs text-bone/50">
@@ -82,6 +84,28 @@ export default async function AdminDashboard() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile: cards */}
+        <div className="flex flex-col gap-3 md:hidden">
+          {recentOrders?.map((o) => (
+            <div key={o.id} className="border border-hairline p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gold">{o.tracking_id}</span>
+                <span className="text-sm text-bone/80">{formatPrice(o.total_amount)}</span>
+              </div>
+              <p className="mt-1 text-sm text-bone/80">{o.shipping_full_name}</p>
+              <div className="mt-1 flex items-center justify-between text-xs text-bone/50">
+                <span>{new Date(o.created_at).toLocaleDateString()}</span>
+                <span className="capitalize">{o.status}</span>
+              </div>
+            </div>
+          ))}
+          {(!recentOrders || recentOrders.length === 0) && (
+            <p className="border border-hairline px-3 py-6 text-center text-sm text-bone/40">
+              No orders yet.
+            </p>
+          )}
         </div>
       </div>
     </div>
