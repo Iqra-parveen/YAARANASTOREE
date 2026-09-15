@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { LayoutDashboard, Package, FolderTree, ClipboardList, Ticket, Image as ImageIcon } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import AdminSignOut from "./AdminSignOut";
+import AdminMobileNav from "./AdminMobileNav";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -37,10 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminSignOut />
         </aside>
         <main className="min-h-dvh flex-1 p-5 md:p-8">
-          <div className="mb-6 flex items-center justify-between md:hidden">
-            <span className="font-display text-lg italic text-bone">YAARANA Admin</span>
-            <AdminSignOut compact />
-          </div>
+          <AdminMobileNav />
           {children}
         </main>
       </div>

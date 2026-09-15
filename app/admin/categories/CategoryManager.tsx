@@ -75,13 +75,13 @@ export default function CategoryManager({ categories }: { categories: Category[]
         {categories.map((c, idx) => (
           <div
             key={c.id}
-            className="flex items-center justify-between border-b border-hairline px-4 py-3 last:border-0"
+            className="flex flex-col gap-2 border-b border-hairline px-4 py-3 last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
           >
             <div>
               <p className="text-sm text-bone">{c.name}</p>
               <p className="text-xs capitalize text-bone/50">{c.status}</p>
             </div>
-            <div className="flex items-center gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-3 text-xs">
               <button onClick={() => move(c, -1)} disabled={idx === 0} className="focus-gold text-bone/50 disabled:opacity-20">
                 <ArrowUp size={14} />
               </button>

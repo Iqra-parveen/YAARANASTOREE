@@ -122,22 +122,24 @@ export default function BannerManager({ banners }: { banners: Banner[] }) {
         {banners.map((b, idx) => (
           <div
             key={b.id}
-            className="flex items-center gap-3 border-b border-hairline px-4 py-3 last:border-0"
+            className="flex flex-col gap-3 border-b border-hairline px-4 py-3 last:border-0 sm:flex-row sm:items-center"
           >
-            <div className="h-12 w-20 shrink-0 overflow-hidden bg-charcoal">
-              {b.media_type === "video" ? (
-                <video src={b.image_url} className="h-full w-full object-cover" muted />
-              ) : (
-                <img src={b.image_url} alt="" className="h-full w-full object-cover" />
-              )}
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-20 shrink-0 overflow-hidden bg-charcoal">
+                {b.media_type === "video" ? (
+                  <video src={b.image_url} className="h-full w-full object-cover" muted />
+                ) : (
+                  <img src={b.image_url} alt="" className="h-full w-full object-cover" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-bone">{b.title || "Untitled banner"}</p>
+                <p className="text-xs capitalize text-bone/50">
+                  {b.media_type} · {b.status}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm text-bone">{b.title || "Untitled banner"}</p>
-              <p className="text-xs capitalize text-bone/50">
-                {b.media_type} · {b.status}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-3 text-xs sm:shrink-0">
               <button onClick={() => move(b, -1)} disabled={idx === 0} className="focus-gold text-bone/50 disabled:opacity-20">
                 <ArrowUp size={14} />
               </button>
