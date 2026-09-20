@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
   ClipboardList,
   Ticket,
+  Ruler,
 } from "lucide-react";
 import AdminSignOut from "./AdminSignOut";
 
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
+  { href: "/admin/size-guides", label: "Size Guides", icon: Ruler },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
   { href: "/admin/orders", label: "Orders", icon: ClipboardList },
   { href: "/admin/promo-codes", label: "Promo Codes", icon: Ticket },

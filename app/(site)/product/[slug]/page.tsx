@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import ProductDetailClient from "./ProductDetailClient";
-import type { Product, ProductVariant } from "@/lib/types";
+import type { Product, ProductVariant, ProductImage, SizeGuide } from "@/lib/types";
 
 export const revalidate = 0;
 
@@ -19,11 +19,13 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
   if (!product) notFound();
 
-  const { data: variants } = await supabase
-    .from("product_variants")
-    .select("*")
-    .eq("product_id", product.id)
-    .eq("status", "active");
+  const [{ data: variants }, { data: images }, { data: sizeGuide }] = await Promise.all([
+    supabase.from("product_variants").select("*").eq("product_id", product.id).eq("status", "active"),
+    supabase.from("product_images").select("*").eq("product_id", product.id).order("display_order"),
+    product.category_id
+      ? supabase.from("size_guides").select("*").eq("category_id", product.category_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
   return (
     <div>
@@ -36,6 +38,8 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       <ProductDetailClient
         product={product as Product}
         variants={(variants as ProductVariant[]) ?? []}
+        images={(images as ProductImage[]) ?? []}
+        sizeGuide={(sizeGuide as SizeGuide | null) ?? null}
       />
     </div>
   );

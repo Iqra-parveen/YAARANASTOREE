@@ -1,16 +1,18 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Button from "@/components/ui/Button";
-import PasswordStrengthBar from "@/components/PasswordStrengthBar";
+import PasswordStrengthBar, { getPasswordRequirements } from "@/components/PasswordStrengthBar";
+import { isValidEmail } from "@/lib/utils";
 
 export default function SignUpPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -19,10 +21,18 @@ export default function SignUpPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address (e.g. abc@gmail.com).");
       return;
     }
+    if (!getPasswordRequirements(password).allMet) {
+      setError(
+        "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character."
+      );
+      return;
+    }
+
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.signUp({
@@ -68,23 +78,35 @@ export default function SignUpPage() {
         <input
           type="email"
           required
-          placeholder="Email"
+          placeholder="Email (e.g. abc@gmail.com)"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="focus-gold rounded-sm border border-hairline bg-charcoal px-3 py-2.5 text-sm text-bone placeholder:text-bone/40"
         />
+
         <div>
-          <input
-            type="password"
-            required
-            minLength={8}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="focus-gold w-full rounded-sm border border-hairline bg-charcoal px-3 py-2.5 text-sm text-bone placeholder:text-bone/40"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="focus-gold w-full rounded-sm border border-hairline bg-charcoal px-3 py-2.5 pr-10 text-sm text-bone placeholder:text-bone/40"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="focus-gold absolute right-3 top-1/2 -translate-y-1/2 text-bone/40"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
           <PasswordStrengthBar password={password} />
         </div>
+
         {error && <p className="text-xs text-rust">{error}</p>}
         <Button type="submit" disabled={loading}>
           {loading ? "Creating account..." : "Sign up"}

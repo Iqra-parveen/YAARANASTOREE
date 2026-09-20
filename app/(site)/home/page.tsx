@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import TopBar from "@/components/TopBar";
+import PromoStrip from "@/components/home/PromoStrip";
 import HeroHeadingSection from "@/components/home/HeroHeadingSection";
 import MarqueeSection from "@/components/home/MarqueeSection";
 import AboutSection from "@/components/home/AboutSection";
@@ -15,7 +16,7 @@ const FALLBACK_ABOUT =
 export default async function HomePage() {
   const supabase = createClient();
 
-  const [{ data: categories }, { data: featured }, { data: banners }, { data: aboutContent }] =
+  const [{ data: categories }, { data: featured }, { data: banners }, { data: aboutContent }, { data: promos }] =
     await Promise.all([
       supabase.from("categories").select("*").eq("status", "active").order("display_order"),
       supabase
@@ -26,6 +27,10 @@ export default async function HomePage() {
         .limit(6),
       supabase.from("banners").select("*").eq("status", "active").order("display_order"),
       supabase.from("site_content").select("*").eq("page_key", "about_us").single(),
+      // promo_codes itself is admin-only via RLS, so the public banner goes
+      // through a SECURITY DEFINER function that only exposes code/discount
+      // for currently-valid codes — not the whole table.
+      supabase.rpc("get_active_promo_banner"),
     ]);
 
   const featuredProducts = (featured as Product[] | null) ?? [];
@@ -36,6 +41,7 @@ export default async function HomePage() {
   return (
     <div>
       <TopBar />
+      <PromoStrip promos={promos ?? []} />
       <HeroHeadingSection banners={(banners as Banner[]) ?? []} />
       <MarqueeSection images={marqueeImages} />
       <AboutSection text={aboutContent?.body ?? FALLBACK_ABOUT} />

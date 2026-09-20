@@ -11,14 +11,17 @@ export type Category = {
 };
 
 export type Product = {
-  media_type: string;
   id: string;
   name: string;
   slug: string;
   description: string | null;
   price: number;
+  compare_at_price: number | null;
+  sku: string | null;
+  styling_tip: string | null;
   category_id: string | null;
   image_url: string | null;
+  media_type: "image" | "video";
   quantity: number;
   status: "active" | "inactive";
   featured: boolean;
@@ -35,6 +38,27 @@ export type ProductVariant = {
   status: "active" | "inactive";
 };
 
+export type ProductImage = {
+  id: string;
+  product_id: string;
+  url: string;
+  media_type: "image" | "video";
+  display_order: number;
+};
+
+export type SizeGuideRow = {
+  size: string;
+  values: string[];
+};
+
+export type SizeGuide = {
+  id: string;
+  category_id: string;
+  unit: "in" | "cm";
+  columns: string[];
+  rows: SizeGuideRow[];
+};
+
 export type CartItem = {
   id: string;
   product_id: string;
@@ -47,22 +71,38 @@ export type CartItem = {
 export type Order = {
   id: string;
   tracking_id: string;
-  user_id: string;
+  user_id: string | null;
   subtotal: number;
   discount_amount: number;
+  shipping_fee: number;
   total_amount: number;
   status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  contact_email: string | null;
+  email_marketing_opt_in: boolean;
+  sms_marketing_opt_in: boolean;
   payment_method: "jazzcash" | "easypaisa" | null;
   payment_status: "awaiting_payment" | "paid" | "failed" | "cancelled";
   payment_txn_ref: string | null;
+  payment_category: "jazzcash" | "easypaisa" | "cod";
+  shipping_method: "prepaid" | "cod";
   shipping_full_name: string;
-  shipping_phone: string;
+  shipping_first_name: string | null;
+  shipping_last_name: string | null;
+  shipping_phone: string | null;
   shipping_address_line1: string;
   shipping_address_line2: string | null;
   shipping_city: string;
   shipping_state: string | null;
   shipping_postal_code: string | null;
   shipping_country: string;
+  billing_same_as_shipping: boolean;
+  billing_first_name: string | null;
+  billing_last_name: string | null;
+  billing_address_line1: string | null;
+  billing_address_line2: string | null;
+  billing_city: string | null;
+  billing_postal_code: string | null;
+  billing_country: string | null;
   created_at: string;
 };
 
@@ -87,6 +127,8 @@ export type PromoCode = {
   usage_count: number;
   status: "active" | "inactive";
   expiry_date: string | null;
+  show_on_banner: boolean;
+  banner_message: string | null;
 };
 
 export type Notification = {

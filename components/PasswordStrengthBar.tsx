@@ -15,6 +15,32 @@ export function getPasswordStrength(password: string): PasswordStrength {
   return "strong";
 }
 
+export interface PasswordRequirements {
+  minLength: boolean;
+  hasUppercase: boolean;
+  hasLowercase: boolean;
+  hasNumber: boolean;
+  hasSpecialChar: boolean;
+  allMet: boolean;
+}
+
+export function getPasswordRequirements(password: string): PasswordRequirements {
+  const minLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+
+  return {
+    minLength,
+    hasUppercase,
+    hasLowercase,
+    hasNumber,
+    hasSpecialChar,
+    allMet: minLength && hasUppercase && hasLowercase && hasNumber && hasSpecialChar,
+  };
+}
+
 const CONFIG: Record<PasswordStrength, { label: string; bars: number; color: string }> = {
   weak: { label: "Weak", bars: 1, color: "bg-rust" },
   medium: { label: "Medium", bars: 2, color: "bg-gold-dim" },

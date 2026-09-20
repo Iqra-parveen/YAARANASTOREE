@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
   const { data: order } = await admin
     .from("orders")
-    .select("id")
+    .select("id, user_id, contact_email")
     .eq("payment_txn_ref", fields.pp_TxnRefNo)
     .single();
 
@@ -38,7 +38,14 @@ export async function POST(req: Request) {
     })
     .eq("id", order.id);
 
-  return NextResponse.redirect(
-    success ? `${origin}/orders/${order.id}?payment=success` : `${origin}/orders/${order.id}?payment=failed`
-  );
+  // Guest orders (no user_id) need the email tacked on so the confirmation
+  // page can look them up via get_guest_order() instead of relying on RLS.
+  // Both outcomes go here (not the login-gated /orders/[id] tracking page)
+  // since a guest has no account to sign into.
+  const base = `${origin}/order-confirmation/${order.id}`;
+  const emailParam = order.user_id ? "" : `email=${encodeURIComponent(order.contact_email ?? "")}`;
+  const paymentParam = success ? "" : "payment=failed";
+  const query = [emailParam, paymentParam].filter(Boolean).join("&");
+
+  return NextResponse.redirect(query ? `${base}?${query}` : base);
 }

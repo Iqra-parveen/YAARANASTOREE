@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import type { Product } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, isOnSale } from "@/lib/utils";
 
 function StackCard({
   product,
@@ -60,7 +60,18 @@ function StackCard({
             ))}
         </div>
 
-        <p className="mt-3 text-center text-gold">{formatPrice(product.price)}</p>
+        <p className="mt-3 text-center">
+          {isOnSale(product) ? (
+            <span className="flex items-baseline justify-center gap-2">
+              <span className="text-xs text-ink/30 line-through">
+                {formatPrice(product.compare_at_price as number)}
+              </span>
+              <span className="text-rust">{formatPrice(product.price)}</span>
+            </span>
+          ) : (
+            <span className="text-gold">{formatPrice(product.price)}</span>
+          )}
+        </p>
       </motion.div>
     </div>
   );
