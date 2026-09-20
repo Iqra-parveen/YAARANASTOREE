@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/context/cart-context";
@@ -33,7 +33,8 @@ const emptyAddress: AddressForm = {
   postalCode: "",
 };
 
-export default function CheckoutPage() {
+// 1. Wrap the main page content inside a sub-component that consumes useSearchParams
+function CheckoutContent() {
   const { lines, subtotal, clear } = useCart();
   const { user } = useAuth();
   const router = useRouter();
@@ -169,9 +170,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    // COD doesn't need an online payment redirect — go straight to confirmation.
-    // Guests (no session) get the email tacked on so the confirmation page can
-    // look the order up via get_guest_order() instead of relying on RLS.
     if (effectivePaymentCategory === "cod") {
       clear();
       const confirmationUrl = user
@@ -196,7 +194,7 @@ export default function CheckoutPage() {
       setSubmitting(false);
       setError(
         err instanceof Error
-          ? `Order ${order.tracking_id} was created, but starting payment failed: ${err.message}. It's saved as pending — you can find it under My Orders.`
+          ? `Order was created, but starting payment failed: ${err.message}. It's saved as pending.`
           : "Payment could not be started."
       );
     }
@@ -482,6 +480,15 @@ export default function CheckoutPage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+// 2. Wrap it with Suspense in the main page export default
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-bone/60">Loading checkout...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
 
