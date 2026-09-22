@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, ShoppingCart, Menu } from "lucide-react";
+import { Bell, ShoppingCart, Menu, Heart } from "lucide-react";
 import { useCart } from "@/lib/context/cart-context";
+import { useWishlist } from "@/lib/context/wishlist-context";
 import SideMenu from "@/components/SideMenu";
 
 export default function TopBar({ title }: { title?: string }) {
-  const { count } = useCart();
+  const { count: cartCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -16,7 +18,7 @@ export default function TopBar({ title }: { title?: string }) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMenuOpen(true)}
-            className="focus-gold text-bone/80"
+            className="focus-gold text-bone/80 hover:text-bone"
             aria-label="Open menu"
           >
             <Menu size={22} strokeWidth={1.5} />
@@ -25,15 +27,35 @@ export default function TopBar({ title }: { title?: string }) {
             {title ?? "YAARANA"}
           </Link>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/notifications" className="focus-gold text-bone/80" aria-label="Notifications">
+        <div className="flex items-center gap-3.5">
+          <Link
+            href="/wishlist"
+            className="focus-gold relative text-bone/80 hover:text-gold transition-colors"
+            aria-label="Wishlist"
+          >
+            <Heart size={20} strokeWidth={1.5} />
+            {wishlistCount > 0 && (
+              <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-semibold text-bone">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/notifications"
+            className="focus-gold text-bone/80 hover:text-gold transition-colors"
+            aria-label="Notifications"
+          >
             <Bell size={20} strokeWidth={1.5} />
           </Link>
-          <Link href="/cart" className="focus-gold relative text-bone/80" aria-label="Cart">
+          <Link
+            href="/cart"
+            className="focus-gold relative text-bone/80 hover:text-gold transition-colors"
+            aria-label="Cart"
+          >
             <ShoppingCart size={20} strokeWidth={1.5} />
-            {count > 0 && (
+            {cartCount > 0 && (
               <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-semibold text-bone">
-                {count}
+                {cartCount}
               </span>
             )}
           </Link>

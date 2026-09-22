@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyEasyPaisaCallback, type EasyPaisaFields } from "@/lib/payments/easypaisa";
+import { sendOrderConfirmationEmail } from "@/lib/email/sendOrderEmails";
 
 /**
  * EasyPaisa posts the transaction result to postBackURL (this route).
@@ -29,11 +30,13 @@ export async function POST(req: Request) {
 
   const { data: order } = await admin
     .from("orders")
-    .select("id, user_id, contact_email")
+    .select("id, user_id, contact_email, payment_status, status")
     .eq("payment_txn_ref", fields.orderRefNum)
     .single();
 
   if (!order) return NextResponse.redirect(`${origin}/checkout?payment=order_not_found`);
+
+  const alreadyPaid = order.payment_status === "paid";
 
   await admin
     .from("orders")
@@ -43,6 +46,23 @@ export async function POST(req: Request) {
       payment_gateway_ref: fields.transactionId || fields.orderRefNum || null,
     })
     .eq("id", order.id);
+
+  if (success && !alreadyPaid) {
+    try {
+      const emailResult = await sendOrderConfirmationEmail(order.id);
+      if (!emailResult.success) {
+        console.warn(`[payment] EasyPaisa confirmation email not sent for order ${order.id}:`, emailResult.error);
+      } else {
+        console.log(`[payment] EasyPaisa confirmation email sent successfully for order ${order.id}`);
+      }
+    } catch (emailErr) {
+      console.warn(`[payment] Error triggering confirmation email for order ${order.id}:`, emailErr);
+    }
+  } else if (success && alreadyPaid) {
+    console.log(`[payment] EasyPaisa callback repeated for order ${order.id}; skipped duplicate email`);
+  } else {
+    console.log(`[payment] EasyPaisa payment failed for order ${order.id}; no confirmation email sent`);
+  }
 
   // Guest orders (no user_id) need the email tacked on so the confirmation
   // page can look them up via get_guest_order() instead of relying on RLS.

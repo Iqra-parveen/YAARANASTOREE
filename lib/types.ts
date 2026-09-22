@@ -26,6 +26,7 @@ export type Product = {
   status: "active" | "inactive";
   featured: boolean;
   categories?: { name: string; slug: string } | null;
+  product_variants?: ProductVariant[];
 };
 
 export type ProductVariant = {

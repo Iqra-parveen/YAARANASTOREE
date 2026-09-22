@@ -76,6 +76,24 @@ export default function SideMenu({ isOpen, onClose }: { isOpen: boolean; onClose
                 )}
               </div>
 
+              <p className="mb-2 mt-6 text-xs tracking-wide text-bone/50">My YAARANA</p>
+              <div className="flex flex-col">
+                <Link
+                  href="/wishlist"
+                  onClick={onClose}
+                  className="focus-gold border-b border-hairline py-3 text-sm text-bone/80"
+                >
+                  Wishlist
+                </Link>
+                <Link
+                  href="/orders"
+                  onClick={onClose}
+                  className="focus-gold border-b border-hairline py-3 text-sm text-bone/80"
+                >
+                  My Orders
+                </Link>
+              </div>
+
               <p className="mb-2 mt-6 text-xs tracking-wide text-bone/50">Help</p>
               <div className="flex flex-col">
                 <Link

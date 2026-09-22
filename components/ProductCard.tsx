@@ -1,15 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { Heart } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { formatPrice, isOnSale } from "@/lib/utils";
+import { useWishlist } from "@/lib/context/wishlist-context";
 
 export default function ProductCard({ product }: { product: Product }) {
   const onSale = isOnSale(product);
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
 
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="focus-gold group block transition-transform duration-300 ease-out hover:-translate-y-1 active:scale-[0.97]"
+      className="focus-gold group relative block transition-transform duration-300 ease-out hover:-translate-y-1 active:scale-[0.97]"
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-charcoal ring-1 ring-transparent transition-all duration-300 group-hover:shadow-lg group-hover:shadow-gold/10 group-hover:ring-gold/40">
         {product.image_url ? (
@@ -35,6 +41,8 @@ export default function ProductCard({ product }: { product: Product }) {
             <span className="font-display italic">YAARANA</span>
           </div>
         )}
+
+        {/* Badges */}
         {onSale ? (
           <span className="absolute left-2 top-2 border border-rust bg-ink/80 px-2 py-0.5 text-[10px] tracking-wide text-rust">
             Sale
@@ -46,12 +54,31 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )
         )}
+
+        {/* Wishlist toggle button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWishlist(product);
+          }}
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          className="focus-gold absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-ink/85 text-bone/70 backdrop-blur transition-all duration-200 hover:scale-110 hover:text-gold active:scale-95"
+        >
+          <Heart
+            size={15}
+            className={wishlisted ? "fill-rust text-rust" : "text-bone/60 hover:text-gold"}
+          />
+        </button>
+
         {product.quantity === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-ink/70">
             <span className="text-xs tracking-wide text-bone/80">Sold out</span>
           </div>
         )}
       </div>
+
       <div className="pt-2">
         <p className="truncate text-sm text-bone">{product.name}</p>
         {onSale ? (

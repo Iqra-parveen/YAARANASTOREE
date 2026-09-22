@@ -171,6 +171,25 @@ function CheckoutContent() {
     }
 
     if (effectivePaymentCategory === "cod") {
+      try {
+        const emailRes = await fetch("/api/emails/order-confirmation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: order.id }),
+        });
+        const emailResult = await emailRes.json().catch(() => null);
+        if (!emailRes.ok || !emailResult?.success) {
+          console.warn(
+            `[checkout] Order confirmation email not sent for order ${order.id}:`,
+            emailResult?.error ?? emailRes.statusText
+          );
+        } else {
+          console.log(`[checkout] Order confirmation email successfully sent for order ${order.id}`);
+        }
+      } catch (emailErr) {
+        console.warn(`[checkout] Failed to contact email service for order ${order.id}:`, emailErr);
+      }
+
       clear();
       const confirmationUrl = user
         ? `/order-confirmation/${order.id}`

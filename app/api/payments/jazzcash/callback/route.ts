@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyJazzCashCallback, type JazzCashFields } from "@/lib/payments/jazzcash";
+import { sendOrderConfirmationEmail } from "@/lib/email/sendOrderEmails";
 
 /**
  * JazzCash POSTs the transaction result to pp_ReturnURL (this route).
@@ -23,11 +24,13 @@ export async function POST(req: Request) {
 
   const { data: order } = await admin
     .from("orders")
-    .select("id, user_id, contact_email")
+    .select("id, user_id, contact_email, payment_status, status")
     .eq("payment_txn_ref", fields.pp_TxnRefNo)
     .single();
 
   if (!order) return NextResponse.redirect(`${origin}/checkout?payment=order_not_found`);
+
+  const alreadyPaid = order.payment_status === "paid";
 
   await admin
     .from("orders")
@@ -37,6 +40,23 @@ export async function POST(req: Request) {
       payment_gateway_ref: fields.pp_RetreivalReferenceNo || fields.pp_TxnRefNo || null,
     })
     .eq("id", order.id);
+
+  if (success && !alreadyPaid) {
+    try {
+      const emailResult = await sendOrderConfirmationEmail(order.id);
+      if (!emailResult.success) {
+        console.warn(`[payment] JazzCash confirmation email not sent for order ${order.id}:`, emailResult.error);
+      } else {
+        console.log(`[payment] JazzCash confirmation email sent successfully for order ${order.id}`);
+      }
+    } catch (emailErr) {
+      console.warn(`[payment] Error triggering confirmation email for order ${order.id}:`, emailErr);
+    }
+  } else if (success && alreadyPaid) {
+    console.log(`[payment] JazzCash callback repeated for order ${order.id}; skipped duplicate email`);
+  } else {
+    console.log(`[payment] JazzCash payment failed for order ${order.id}; no confirmation email sent`);
+  }
 
   // Guest orders (no user_id) need the email tacked on so the confirmation
   // page can look them up via get_guest_order() instead of relying on RLS.
